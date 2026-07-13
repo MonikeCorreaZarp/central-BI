@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central BI · Pós-Vendas</title>
+
+<style>
+/* ==========================================================================
+   CENTRAL BI — PÓS-VENDAS
+   Portal único de acesso aos dashboards de Power BI / sistemas do setor.
+   --------------------------------------------------------------------------
+   ÍNDICE DO CSS
+   1. Tokens (cores, tipografia, espaçamentos)
+   2. Reset & base
+   3. Header
+   4. Layout (sidebar + conteúdo)
+   5. Sidebar / categorias
+   6. Barra de destaque (stats + mais usados)
+   7. Grid de cards
+   8. Card de dashboard
+   9. Estado vazio / sem resultados
+   10. Botão voltar ao topo
+   11. Rodapé
+   12. Dark mode
+   13. Responsivo
+   ========================================================================== */
+
+/* ---------- 1. TOKENS ---------- */
+:root{
+  /* paleta corporativa: azul / branco / cinza */
+  --navy-950:#0E2244;
+  --navy-900:#122952;
+  --navy-800:#1B3A6B;
+  --blue-600:#2C5CE0;
+  --blue-500:#3D6EFF;
+  --blue-100:#E8EFFE;
+  --sky-50:#F4F7FD;
+  --slate-50:#F5F7FA;
+  --slate-100:#EDF0F5;
+  --slate-200:#DDE3EC;
+  --slate-400:#9BA9BE;
+  --slate-600:#5B6B82;
+  --slate-900:#16233A;
+  --white:#FFFFFF;
+  --gold-500:#E3A23A;
+  --green-600:#1F9D6C;
+
+  --font-ui: "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", Arial, sans-serif;
+  --font-mono: "Consolas", "SFMono-Regular", Menlo, monospace;
+
+  --radius-sm:8px;
+  --radius-md:14px;
+  --radius-lg:20px;
+  --shadow-sm: 0 1px 2px rgba(14,34,68,.06), 0 1px 1px rgba(14,34,68,.04);
+  --shadow-md: 0 8px 24px rgba(14,34,68,.10), 0 2px 6px rgba(14,34,68,.06);
+  --shadow-lg: 0 20px 40px rgba(14,34,68,.16);
+
+  --header-h: 68px;
+  --sidebar-w: 252px;
+
+  --bg-page: var(--slate-50);
+  --bg-surface: var(--white);
+  --bg-surface-2: var(--sky-50);
+  --text-main: var(--slate-900);
+  --text-muted: var(--slate-600);
+  --border-color: var(--slate-200);
+}
+
+/* Dark mode tokens */
+body.dark{
+  --bg-page:#0B1526;
+  --bg-surface:#131F35;
+  --bg-surface-2:#101A2E;
+  --text-main:#E8EDF7;
+  --text-muted:#8FA0BC;
+  --border-color:#233252;
+  --slate-100:#182545;
+  --blue-100:#182B52;
+}
+
+/* ---------- 2. RESET & BASE ---------- */
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0;
+  font-family:var(--font-ui);
+  background:var(--bg-page);
+  color:var(--text-main);
+  transition:background .25s ease, color .25s ease;
+  -webkit-font-smoothing:antialiased;
+}
+button{ font-family:inherit; cursor:pointer; }
+a{ text-decoration:none; color:inherit; }
+input{ font-family:inherit; }
+::selection{ background:var(--blue-100); }
+
+/* ---------- 3. HEADER ---------- */
+.topbar{
+  position:fixed; top:0; left:0; right:0; height:var(--header-h);
+  background:linear-gradient(135deg,var(--navy-950),var(--navy-800));
+  display:flex; align-items:center; gap:20px;
+  padding:0 24px;
+  z-index:100;
+  box-shadow:var(--shadow-md);
+}
+.topbar__brand{ display:flex; align-items:center; gap:12px; min-width:220px; }
+.topbar__logo{
+  width:38px; height:38px; border-radius:10px;
+  background:linear-gradient(135deg,var(--blue-500),var(--gold-500));
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:700; font-size:15px; letter-spacing:.5px;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+  flex:none;
+}
+.topbar__title{ line-height:1.15; }
+.topbar__title strong{ display:block; color:#fff; font-size:16px; font-weight:600; letter-spacing:.2px; }
+.topbar__title span{ display:block; color:#B7C6E6; font-size:11.5px; font-weight:400; }
+
+.topbar__search{ flex:1; max-width:560px; position:relative; }
+.topbar__search input{
+  width:100%; height:40px; border-radius:10px; border:1px solid transparent;
+  background:rgba(255,255,255,.12); color:#fff; padding:0 40px 0 40px;
+  font-size:14px; outline:none; transition:background .2s, box-shadow .2s;
+}
+.topbar__search input::placeholder{ color:#B7C6E6; }
+.topbar__search input:focus{ background:rgba(255,255,255,.2); box-shadow:0 0 0 3px rgba(61,110,255,.35); }
+.topbar__search svg{ position:absolute; left:13px; top:50%; transform:translateY(-50%); opacity:.75; }
+.topbar__search .clear-btn{
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  background:none; border:none; color:#B7C6E6; font-size:16px; display:none;
+}
+.topbar__search .clear-btn.show{ display:block; }
+
+.topbar__actions{ display:flex; align-items:center; gap:10px; margin-left:auto; }
+.icon-btn{
+  width:38px; height:38px; border-radius:10px; border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.08); color:#fff; display:flex; align-items:center; justify-content:center;
+  transition:background .2s, transform .15s;
+}
+.icon-btn:hover{ background:rgba(255,255,255,.2); transform:translateY(-1px); }
+
+/* ---------- 4. LAYOUT ---------- */
+.shell{
+  display:flex;
+  margin-top:var(--header-h);
+  min-height:calc(100vh - var(--header-h));
+}
+.main{
+  flex:1; min-width:0;
+  padding:28px 32px 80px;
+}
+
+/* ---------- 5. SIDEBAR ---------- */
+.sidebar{
+  width:var(--sidebar-w); flex:none;
+  position:sticky; top:var(--header-h);
+  height:calc(100vh - var(--header-h));
+  overflow-y:auto;
+  background:var(--bg-surface);
+  border-right:1px solid var(--border-color);
+  padding:22px 14px 30px;
+}
+.sidebar__heading{
+  font-size:11px; text-transform:uppercase; letter-spacing:.08em;
+  color:var(--text-muted); font-weight:700; margin:6px 10px 10px;
+}
+.cat-list{ list-style:none; margin:0 0 22px; padding:0; display:flex; flex-direction:column; gap:2px; }
+.cat-item{
+  display:flex; align-items:center; gap:10px;
+  padding:9px 10px; border-radius:10px; color:var(--text-main);
+  font-size:13.5px; font-weight:500; border:1px solid transparent;
+  transition:background .15s, border-color .15s;
+}
+.cat-item .cat-icon{ width:20px; height:20px; flex:none; color:var(--blue-600); }
+.cat-item .cat-label{ flex:1; }
+.cat-item .cat-count{
+  font-size:11.5px; font-weight:700; color:var(--text-muted);
+  background:var(--slate-100); border-radius:20px; padding:2px 8px;
+}
+.cat-item:hover{ background:var(--blue-100); cursor:pointer; }
+.cat-item.active{ background:var(--blue-100); border-color:var(--blue-600); }
+.cat-item.active .cat-count{ background:var(--blue-600); color:#fff; }
+
+.sidebar__note{
+  font-size:11.5px; color:var(--text-muted); line-height:1.5;
+  padding:12px; border-radius:10px; background:var(--bg-surface-2);
+  border:1px dashed var(--border-color);
+}
+
+/* ---------- 6. HERO / STATS + DESTAQUES ---------- */
+.hero{
+  display:flex; flex-wrap:wrap; gap:16px; margin-bottom:26px;
+}
+.stat-card{
+  flex:1; min-width:150px;
+  background:var(--bg-surface); border:1px solid var(--border-color);
+  border-radius:var(--radius-md); padding:16px 18px;
+  box-shadow:var(--shadow-sm);
+  display:flex; flex-direction:column; gap:4px;
+}
+.stat-card b{ font-size:26px; font-family:var(--font-mono); color:var(--navy-800); }
+body.dark .stat-card b{ color:#fff; }
+.stat-card span{ font-size:12px; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:.04em; }
+
+.section-title{
+  display:flex; align-items:center; gap:10px; margin:34px 0 14px;
+}
+.section-title h2{ font-size:16px; margin:0; font-weight:700; letter-spacing:.1px; }
+.section-title .line{ flex:1; height:1px; background:var(--border-color); }
+.section-title .tag{
+  font-size:11px; font-weight:700; color:var(--blue-600); background:var(--blue-100);
+  padding:3px 9px; border-radius:20px; text-transform:uppercase; letter-spacing:.05em;
+}
+
+
+/* ---------- 7. GRID ---------- */
+.category-block{ margin-bottom:8px; }
+.grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(268px,1fr));
+  gap:18px;
+}
+
+/* ---------- 8. CARD ---------- */
+.card{
+  position:relative;
+  background:var(--bg-surface);
+  border:1px solid var(--border-color);
+  border-radius:var(--radius-lg);
+  padding:18px 18px 16px;
+  display:flex; flex-direction:column; gap:10px;
+  box-shadow:var(--shadow-sm);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.card:hover{ transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:var(--blue-500); }
+
+.card__top{ display:flex; align-items:flex-start; gap:12px; padding-right:34px; }
+.card__icon{
+  width:44px; height:44px; border-radius:12px; flex:none;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--blue-100); color:var(--blue-600);
+}
+.card__icon svg{ width:22px; height:22px; }
+.card__heading{ flex:1; min-width:0; }
+.card__heading h3{
+  margin:0 0 4px; font-size:14.5px; font-weight:700; line-height:1.32;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.card__cat{
+  font-size:10.5px; font-weight:700; color:var(--blue-600); text-transform:uppercase; letter-spacing:.05em;
+}
+
+/* botão de favoritar: fixo no canto superior direito do card, com fundo próprio
+   para nunca colidir com o título e ficar sempre visível (claro ou escuro) */
+.fav-btn{
+  position:absolute; top:14px; right:14px; z-index:2;
+  width:30px; height:30px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--bg-surface-2); border:1px solid var(--border-color);
+  color:var(--slate-400);
+  transition:color .15s, transform .15s, border-color .15s;
+}
+.fav-btn svg{ width:16px; height:16px; }
+.fav-btn:hover{ transform:scale(1.12); border-color:var(--gold-500); }
+.fav-btn.active{ color:var(--gold-500); border-color:var(--gold-500); }
+
+.card__desc{ font-size:12.8px; color:var(--text-muted); line-height:1.5; flex:1; min-height:36px; }
+
+/* rodapé do card em coluna: origem em cima, botão abaixo ocupando a largura toda —
+   evita qualquer corte/sobreposição de texto independente do tamanho do card */
+.card__footer{ display:flex; flex-direction:column; align-items:stretch; gap:9px; margin-top:6px; }
+.card__source{ font-size:10.5px; color:var(--slate-400); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.card__open{
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  background:var(--blue-600); color:#fff; font-size:12.5px; font-weight:600;
+  padding:9px 14px; border-radius:9px; border:none; white-space:nowrap;
+  transition:background .15s, transform .15s;
+}
+.card__open:hover{ background:var(--navy-800); transform:translateX(1px); }
+.card__open svg{ width:13px; height:13px; flex:none; }
+
+/* ---------- 9. EMPTY STATE ---------- */
+.empty-state{
+  display:none; flex-direction:column; align-items:center; text-align:center;
+  padding:60px 20px; color:var(--text-muted);
+}
+.empty-state.show{ display:flex; }
+.empty-state svg{ margin-bottom:14px; opacity:.5; }
+.empty-state h3{ margin:0 0 6px; color:var(--text-main); font-size:16px; }
+
+/* ---------- 10. VOLTAR AO TOPO ---------- */
+.to-top{
+  position:fixed; right:26px; bottom:26px; width:46px; height:46px;
+  border-radius:50%; border:none; background:var(--navy-800); color:#fff;
+  box-shadow:var(--shadow-md); display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transform:translateY(10px);
+  transition:opacity .2s, transform .2s; z-index:90;
+}
+.to-top.show{ opacity:1; pointer-events:auto; transform:translateY(0); }
+.to-top:hover{ background:var(--blue-600); }
+
+/* ---------- 11. RODAPÉ ---------- */
+.footer{
+  margin-top:46px; padding-top:18px; border-top:1px solid var(--border-color);
+  display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between;
+  font-size:12px; color:var(--text-muted);
+}
+
+/* ---------- 13. RESPONSIVO ---------- */
+.menu-toggle{ display:none; }
+@media (max-width: 980px){
+  .sidebar{
+    position:fixed; left:0; top:var(--header-h); z-index:95;
+    transform:translateX(-100%); transition:transform .25s ease;
+    box-shadow:var(--shadow-lg);
+  }
+  .sidebar.open{ transform:translateX(0); }
+  .menu-toggle{ display:flex; }
+  .topbar__title span{ display:none; }
+}
+@media (max-width: 640px){
+  .topbar{ padding:0 14px; gap:10px; }
+  .topbar__title strong{ font-size:14px; }
+  .topbar__search{ max-width:none; }
+  .main{ padding:20px 16px 70px; }
+  .grid{ grid-template-columns:1fr; }
+  .stat-card b{ font-size:21px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header class="topbar">
+  <button class="icon-btn menu-toggle" id="menuToggle" title="Categorias" aria-label="Abrir categorias">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+
+  <div class="topbar__brand">
+    <div class="topbar__logo">BI</div>
+    <div class="topbar__title">
+      <strong>Central BI</strong>
+      <span>Portal de Dashboards · Pós-Vendas</span>
+    </div>
+  </div>
+
+  <div class="topbar__search">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B7C6E6" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input type="text" id="searchInput" placeholder="Pesquisar dashboard, setor ou palavra-chave...">
+    <button class="clear-btn" id="clearSearch" title="Limpar">✕</button>
+  </div>
+
+  <div class="topbar__actions">
+    <button class="icon-btn" id="darkToggle" title="Alternar modo escuro" aria-label="Alternar modo escuro">
+      <svg id="darkIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ============================================================
+     LAYOUT: SIDEBAR + CONTEÚDO
+     ============================================================ -->
+<div class="shell">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__heading">Categorias</div>
+    <ul class="cat-list" id="catList"><!-- gerado via JS --></ul>
+
+    <div class="sidebar__note">
+      💡 Não encontrou o dashboard que precisa? Fale com o time de BI para incluí-lo neste portal.
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ---------- STATS ---------- -->
+    <div class="hero">
+      <div class="stat-card"><b id="statTotal">0</b><span>Dashboards</span></div>
+      <div class="stat-card"><b id="statCats">0</b><span>Categorias</span></div>
+      <div class="stat-card"><b id="statFav">0</b><span>Favoritos</span></div>
+      <div class="stat-card"><b id="statUpdate" style="font-size:15px;">—</b><span>Última atualização</span></div>
+    </div>
+
+    <!-- ---------- RESULTADOS / CATEGORIAS ---------- -->
+    <div id="resultsWrap"><!-- gerado via JS --></div>
+
+    <div class="empty-state" id="emptyState">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 11h6"/></svg>
+      <h3>Nenhum dashboard encontrado</h3>
+      <div>Tente outro termo de pesquisa ou selecione outra categoria.</div>
+    </div>
+
+    <div class="footer">
+      <div>© <span id="year"></span> Central BI — Pós-Vendas. Ponto único de acesso aos dashboards internos.</div>
+      <div>Estrutura pronta para novos dashboards — edite o array <code>DASHBOARDS</code> no código-fonte.</div>
+    </div>
+
+  </main>
+</div>
+
+<button class="to-top" id="toTop" aria-label="Voltar ao topo">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+/* ============================================================
+   CENTRAL BI — PÓS-VENDAS
+   ------------------------------------------------------------
+   COMO ADICIONAR UM NOVO DASHBOARD:
+   Basta incluir um novo objeto no array DASHBOARDS abaixo,
+   seguindo o mesmo modelo. O portal (busca, filtros, contadores,
+   agrupamento por categoria) é gerado automaticamente a partir
+   deste array — não é necessário alterar HTML/CSS.
+
+   Campos:
+     id          -> identificador único (string, sem espaços)
+     name        -> nome exibido no card
+     description -> descrição curta (1 linha)
+     category    -> deve bater com uma chave de CATEGORIES abaixo
+     url         -> link do dashboard / sistema
+     source      -> origem do link, ex: "Power BI", "Sistema Web"
+   ============================================================ */
+
+// ---------- Definição das categorias (ordem = ordem no menu) ----------
+const CATEGORIES = {
+  oficina:   { label: "Oficina",         icon: "wrench"   },
+  revisao:   { label: "Revisão Inteligente", icon: "zap"  },
+  pecas:     { label: "Peças",           icon: "box"      },
+  garantia:  { label: "Garantia",        icon: "shield"   },
+  financeiro:{ label: "Financeiro",      icon: "coin"     },
+  crm:       { label: "CRM / Call Center", icon: "headset" },
+  gestao:    { label: "Gestão",          icon: "briefcase"},
+};
+
+// ---------- Base de dashboards (extraída e organizada do Links.xlsx) ----------
+const DASHBOARDS = [
+  {
+    id: "perf-oficina",
+    name: "Performance da Oficina",
+    description: "Indicadores gerais de performance e produtividade da oficina.",
+    category: "oficina",
+    url: "https://app.powerbi.com/view?r=eyJrIjoiM2JiNjc0NDQtMzY0YS00NWIyLTgyNmItNWRiZDI0M2MwNDI0IiwidCI6ImYwNjU0NTc1LWE1YTItNDFmYS1iN2JkLWRmYTgwYTM1MDY2NiJ9",
+    source: "Power BI",
+  },
+  {
+    id: "retencao",
+    name: "Retenção de Clientes",
+    description: "Acompanhamento da taxa de retenção de clientes na oficina.",
+    category: "oficina",
+    url: "https://app.powerbi.com/view?r=eyJrIjoiMGNmZjk2ZTQtOTQwYS00OWFiLTg1YTQtODcxNDkyMzhkYjdiIiwidCI6ImYwNjU0NTc1LWE1YTItNDFmYS1iN2JkLWRmYTgwYTM1MDY2NiJ9",
+    source: "Power BI",
+  },
+  {
+    id: "avarias",
+    name: "Avarias de Veículos",
+    description: "Controle e registro de avarias identificadas em veículos.",
+    category: "oficina",
+    url: "https://avarias.netlify.app/",
+    source: "Sistema Web",
+  },
+  {
+    id: "os-abertas",
+    name: "Ordens de Serviço em Aberto",
+    description: "Auditoria e acompanhamento das OSs ainda em aberto.",
+    category: "oficina",
+    url: "https://auditoriaos.netlify.app/",
+    source: "Sistema Web",
+  },
+  {
+    id: "garantia",
+    name: "Garantias",
+    description: "Acompanhamento das garantias registradas na oficina.",
+    category: "garantia",
+    url: "https://app.powerbi.com/view?r=eyJrIjoiZThhOTgwNzUtYTQ3Yi00ZDBmLTk5OTMtN2Q5MDE2ZWQ2NGM2IiwidCI6ImYwNjU0NTc1LWE1YTItNDFmYS1iN2JkLWRmYTgwYTM1MDY2NiJ9",
+    source: "Power BI",
+  },
+  {
+    id: "revisao-inteligente",
+    name: "Revisão Inteligente",
+    description: "Dashboard do programa de revisão inteligente de veículos.",
+    category: "revisao",
+    url: "https://revisaointeligente.netlify.app/",
+    source: "Sistema Web",
+  },
+  {
+    id: "calculadora-revisao",
+    name: "Calculadora",
+    description: "Calculadora do programa de revisão inteligente de veículos.",
+    category: "revisao",
+    url: "https://monikecorreazarp.github.io/Calculadora/",
+    source: "Sistema Web",
+  },
+  {
+    id: "painel-risco",
+    name: "Painel de Risco",
+    description: "Painel de acompanhamento de risco para o diretor da oficina.",
+    category: "oficina",
+    url: "https://monikecorreazarp.github.io/Painel-de-risco/painel_diretor_2.html",
+    source: "Sistema Web",
+  },
+  {
+    id: "pecas-nao-aplicadas",
+    name: "Peças Não Aplicadas",
+    description: "Peças compradas em OS e ainda não aplicadas ao veículo.",
+    category: "pecas",
+    url: "https://app.powerbi.com/view?r=eyJrIjoiYzQwMTY4MDEtZGNlZC00MThhLWJkNTgtZDc1Mzc1YzEwZTlkIiwidCI6ImYwNjU0NTc1LWE1YTItNDFmYS1iN2JkLWRmYTgwYTM1MDY2NiJ9",
+    source: "Power BI",
+  },
+  {
+    id: "estoque-pecas",
+    name: "Estoque de Peças",
+    description: "Posição atual do estoque de peças.",
+    category: "pecas",
+    url: "https://app.powerbi.com/view?r=eyJrIjoiMWVlNWUwMzItOTdjMi00YTU3LWEwYjYtOTAwNWRjNDU5Nzk4IiwidCI6ImYwNjU0NTc1LWE1YTItNDFmYS1iN2JkLWRmYTgwYTM1MDY2NiJ9",
+    source: "Power BI",
+  },
+  {
+    id: "carteira-pecas",
+    name: "Carteira de Peças",
+    description: "Acompanhamento da carteira de pedidos de peças.",
+    category: "pecas",
+    url: "https://app.powerbi.com/view?r=eyJrIjoiMDdlNGQ4NWQtMTBiNC00M2ZjLThkODctODQ1NmM4ZDI2YWI1IiwidCI6ImYwNjU0NTc1LWE1YTItNDFmYS1iN2JkLWRmYTgwYTM1MDY2NiJ9",
+    source: "Power BI",
+  },
+  {
+    id: "sugestao-compra",
+    name: "Sugestão de Compra e Transferência",
+    description: "Análise de estoque para sugerir compra e/ou transferência entre unidades.",
+    category: "pecas",
+    url: "https://dashboard-estoque.netlify.app/",
+    source: "Sistema Web",
+  },
+  {
+    id: "contas-receber",
+    name: "Contas a Receber",
+    description: "Contas a receber das áreas de Oficina e Peças.",
+    category: "financeiro",
+    url: "https://cobrancacrs.netlify.app/",
+    source: "Sistema Web",
+  },
+  {
+    id: "agendamento-comparecimento",
+    name: "Agendamentos e Comparecimento",
+    description: "Histórico de agendamentos e percentual de comparecimento dos clientes.",
+    category: "crm",
+    url: "https://app.powerbi.com/view?r=eyJrIjoiN2VjNDVmOTAtNjUyZS00MzkxLWExYTYtNmQ3M2IxMjk0OGMwIiwidCI6ImYwNjU0NTc1LWE1YTItNDFmYS1iN2JkLWRmYTgwYTM1MDY2NiJ9",
+    source: "Power BI",
+  },
+  {
+    id: "tv-call-center",
+    name: "TV Call Center",
+    description: "Painel em tempo real para exibição na TV do Call Center.",
+    category: "crm",
+    url: "https://app.powerbi.com/view?r=eyJrIjoiZDhlNjY5NTEtYTFiYi00ZjQzLWE4MTctZGVmZjNkMzljYWE1IiwidCI6ImYwNjU0NTc1LWE1YTItNDFmYS1iN2JkLWRmYTgwYTM1MDY2NiJ9",
+    source: "Power BI",
+  },
+  {
+    id: "sistema-analysis",
+    name: "Sistema Analysis",
+    description: "Portal de login do Sistema Analysis (Oficina e Peças).",
+    category: "gestao",
+    url: "https://portalanalysisbi.com/login",
+    source: "Sistema Web",
+  },
+];
+
+// última atualização do portal (ajustar manualmente ao editar a base)
+const LAST_UPDATE = "13/07/2026";
+
+// ---------- Ícones (SVG inline — sem dependências externas) ----------
+const ICONS = {
+  wrench:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 10-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 005.4-5.4l-2.66 2.66a1.5 1.5 0 01-2.12 0l-1.18-1.18a1.5 1.5 0 010-2.12L14.7 6.3z"/></svg>',
+  box:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
+  shield:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  coin:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 .9 3 2c0 2.5-6 1-6 3.5 0 1.1 1.3 2 3 2s3-1.1 3-2.5"/></svg>',
+  headset:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13a9 9 0 0118 0"/><path d="M21 13v5a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3z"/><path d="M3 13v5a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>',
+  briefcase:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M3 12h18"/></svg>',
+  zap:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+  open:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>',
+  star:     '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>',
+  starOut:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>',
+};
+
+// ---------- Estado ----------
+const state = {
+  search: "",
+  activeCategory: "all",
+  favorites: loadFavorites(),
+};
+
+function loadFavorites(){
+  try{
+    return JSON.parse(localStorage.getItem("bi_portal_favorites") || "[]");
+  }catch(e){ return []; }
+}
+function saveFavorites(){
+  try{ localStorage.setItem("bi_portal_favorites", JSON.stringify(state.favorites)); }catch(e){}
+}
+function toggleFavorite(id){
+  const idx = state.favorites.indexOf(id);
+  if(idx >= 0) state.favorites.splice(idx,1); else state.favorites.push(id);
+  saveFavorites();
+  render();
+}
+
+// ---------- Helpers ----------
+function matchesSearch(d, term){
+  if(!term) return true;
+  const t = term.toLowerCase();
+  return d.name.toLowerCase().includes(t)
+      || d.description.toLowerCase().includes(t)
+      || CATEGORIES[d.category].label.toLowerCase().includes(t);
+}
+
+function cardHTML(d){
+  const isFav = state.favorites.includes(d.id);
+  return `
+    <div class="card" data-id="${d.id}">
+      <button class="fav-btn${isFav ? " active" : ""}" title="${isFav ? "Remover dos favoritos" : "Adicionar aos favoritos"}" data-fav="${d.id}">
+        ${isFav ? ICONS.star : ICONS.starOut}
+      </button>
+      <div class="card__top">
+        <div class="card__icon">${ICONS[CATEGORIES[d.category].icon]}</div>
+        <div class="card__heading">
+          <h3>${d.name}</h3>
+          <div class="card__cat">${CATEGORIES[d.category].label}</div>
+        </div>
+      </div>
+      <div class="card__desc">${d.description}</div>
+      <div class="card__footer">
+        <span class="card__source">${d.source}</span>
+        <a class="card__open" href="${d.url}" target="_blank" rel="noopener noreferrer">
+          Abrir Dashboard ${ICONS.open}
+        </a>
+      </div>
+    </div>`;
+}
+
+// ---------- Render ----------
+function render(){
+  const term = state.search.trim().toLowerCase();
+  const cat = state.activeCategory;
+
+  // filtra
+  let filtered = DASHBOARDS.filter(d => matchesSearch(d, term));
+  if(cat === "favoritos"){
+    filtered = filtered.filter(d => state.favorites.includes(d.id));
+  } else if(cat !== "all"){
+    filtered = filtered.filter(d => d.category === cat);
+  }
+
+  // ---- sidebar ----
+  const catList = document.getElementById("catList");
+  const allCount = DASHBOARDS.filter(d => matchesSearch(d, term)).length;
+  let catHTML = `
+    <li class="cat-item${cat==='all' ? ' active' : ''}" data-cat="all">
+      <span class="cat-icon">${ICONS.briefcase}</span>
+      <span class="cat-label">Todos</span>
+      <span class="cat-count">${allCount}</span>
+    </li>`;
+  Object.keys(CATEGORIES).forEach(key=>{
+    const count = DASHBOARDS.filter(d => d.category===key && matchesSearch(d, term)).length;
+    catHTML += `
+      <li class="cat-item${cat===key ? ' active' : ''}" data-cat="${key}">
+        <span class="cat-icon">${ICONS[CATEGORIES[key].icon]}</span>
+        <span class="cat-label">${CATEGORIES[key].label}</span>
+        <span class="cat-count">${count}</span>
+      </li>`;
+  });
+  const favCount = DASHBOARDS.filter(d => state.favorites.includes(d.id) && matchesSearch(d, term)).length;
+  catHTML += `
+      <li class="cat-item${cat==='favoritos' ? ' active' : ''}" data-cat="favoritos">
+        <span class="cat-icon">${ICONS.star}</span>
+        <span class="cat-label">Favoritos</span>
+        <span class="cat-count">${favCount}</span>
+      </li>`;
+  catList.innerHTML = catHTML;
+
+  document.querySelectorAll(".cat-item").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      state.activeCategory = el.dataset.cat;
+      document.getElementById("sidebar").classList.remove("open");
+      render();
+    });
+  });
+
+  // ---- resultados agrupados por categoria ----
+  const wrap = document.getElementById("resultsWrap");
+  const emptyState = document.getElementById("emptyState");
+
+  if(filtered.length === 0){
+    wrap.innerHTML = "";
+    emptyState.classList.add("show");
+  } else {
+    emptyState.classList.remove("show");
+
+    if(cat === "all"){
+      let html = "";
+      Object.keys(CATEGORIES).forEach(key=>{
+        const items = filtered.filter(d => d.category === key);
+        if(!items.length) return;
+        html += `
+          <div class="category-block">
+            <div class="section-title">
+              <h2>${CATEGORIES[key].label}</h2>
+              <span class="tag">${items.length}</span>
+              <div class="line"></div>
+            </div>
+            <div class="grid">${items.map(cardHTML).join("")}</div>
+          </div>`;
+      });
+      wrap.innerHTML = html;
+    } else {
+      const title = cat === "favoritos" ? "Favoritos" : CATEGORIES[cat].label;
+      wrap.innerHTML = `
+        <div class="category-block">
+          <div class="section-title">
+            <h2>${title}</h2>
+            <span class="tag">${filtered.length}</span>
+            <div class="line"></div>
+          </div>
+          <div class="grid">${filtered.map(cardHTML).join("")}</div>
+        </div>`;
+    }
+  }
+
+  // liga botões de favorito
+  document.querySelectorAll("[data-fav]").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      toggleFavorite(btn.dataset.fav);
+    });
+  });
+
+  // stats
+  document.getElementById("statTotal").textContent = DASHBOARDS.length;
+  document.getElementById("statCats").textContent = Object.keys(CATEGORIES).length;
+  document.getElementById("statFav").textContent = state.favorites.length;
+  document.getElementById("statUpdate").textContent = LAST_UPDATE;
+}
+
+// ---------- Eventos globais ----------
+document.getElementById("searchInput").addEventListener("input", (e)=>{
+  state.search = e.target.value;
+  document.getElementById("clearSearch").classList.toggle("show", !!state.search);
+  render();
+});
+document.getElementById("clearSearch").addEventListener("click", ()=>{
+  state.search = "";
+  document.getElementById("searchInput").value = "";
+  document.getElementById("clearSearch").classList.remove("show");
+  render();
+});
+
+document.getElementById("menuToggle").addEventListener("click", ()=>{
+  document.getElementById("sidebar").classList.toggle("open");
+});
+
+// dark mode
+const darkToggle = document.getElementById("darkToggle");
+function applyDarkPreference(){
+  const saved = localStorage.getItem("bi_portal_theme");
+  if(saved === "dark") document.body.classList.add("dark");
+}
+darkToggle.addEventListener("click", ()=>{
+  document.body.classList.toggle("dark");
+  localStorage.setItem("bi_portal_theme", document.body.classList.contains("dark") ? "dark" : "light");
+});
+
+// voltar ao topo
+const toTopBtn = document.getElementById("toTop");
+window.addEventListener("scroll", ()=>{
+  toTopBtn.classList.toggle("show", window.scrollY > 400);
+});
+toTopBtn.addEventListener("click", ()=> window.scrollTo({top:0, behavior:"smooth"}));
+
+// rodapé - ano
+document.getElementById("year").textContent = new Date().getFullYear();
+
+// ---------- Inicialização ----------
+applyDarkPreference();
+render();
+</script>
+</body>
+</html>
